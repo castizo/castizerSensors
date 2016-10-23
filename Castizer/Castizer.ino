@@ -10,7 +10,8 @@
 // Example and instructions: http://playground.arduino.cc/Code/Potentiometer#Functions
 
 #define SW_ONOFF_PIN 2
-#define LED_ONOFF_PIN 8
+//#define LED_ONOFF_PIN 8
+#define LED_ONOFF_PIN LED_BUILTIN
 #define POT_VOLUME_PIN 0
 #define POT_DIAL_PIN 1
 #define JOY_X_PIN 2
@@ -19,7 +20,7 @@
 
 
 int sw_onoff_val, sw_onoff_val_old;
-int pot_volume_sector, pot_volume_sector_old;
+int pot_volume_sector, pot_volume_sector1, pot_volume_sector2, pot_volume_sector_old;
 int pot_dial_sector, pot_dial_sector_old;
 int joy_button_val, joy_button_val_old;
 
@@ -38,6 +39,24 @@ Potentiometer potVolume = Potentiometer(POT_VOLUME_PIN);
 Potentiometer potDial = Potentiometer(POT_DIAL_PIN);
 
 
+
+int readPot()
+{
+
+  char pot_dial_sector_str[10];
+  
+  pot_dial_sector = potDial.getSector();
+  if (pot_dial_sector != pot_dial_sector_old){
+    pot_dial_sector_old = pot_dial_sector;
+    Serial.print("C");
+    sprintf(pot_dial_sector_str, "%02d", pot_dial_sector);
+    Serial.print(pot_dial_sector_str);
+    Serial.println();
+    Serial.println(potDial.getValue(),DEC);
+  }
+  delay(200);
+
+}
 
 
 int readOnOffSwitch()
@@ -65,7 +84,10 @@ int readVolume()
 
   char pot_volume_sector_str[10];
   
-  pot_volume_sector = potVolume.getSector();
+  pot_volume_sector1 = potVolume.getSector();
+  delay(100);
+  pot_volume_sector2 = potVolume.getSector();
+  pot_volume_sector = (pot_volume_sector1+pot_volume_sector2)/2;
   if (pot_volume_sector != pot_volume_sector_old){
     pot_volume_sector_old = pot_volume_sector;
     Serial.print("V");
@@ -185,13 +207,15 @@ void loop() {
     }
 
     // set the LED with the ledState of the variable:
-    digitalWrite(LED_BUILTIN, ledBlinkingState);
+    //digitalWrite(LED_BUILTIN, ledBlinkingState);
   }
 
   readVolume();
-  //readDial();
-  //readOnOffSwitch();
-  //readJoystick();
+  readDial();
+  readOnOffSwitch();
+  readJoystick();
+  
+  //readPot();
   
   delay(50);
 
